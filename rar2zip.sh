@@ -22,11 +22,12 @@ if [ -e $zip_name ]; then
   exit 1
 fi
 
+cd `dirname "$1"`
 tmp_dir=$(mktemp -d rar2zip.XXXXXX)
 trap "rm -rf $tmp_dir" 0
-unrar x -inul $1 $tmp_dir
+unrar x -inul `basename "$1"` $tmp_dir
 if [ $? -ne 0 ]; then
-  echo Invalied rar file
+  echo Invalid rar file
   exit 1
 fi
 
