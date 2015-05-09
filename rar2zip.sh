@@ -1,7 +1,14 @@
 #!/bin/sh
 
-help(){
+usage(){
   echo Usage: foo.rar
+  exit 1
+}
+
+is_rar(){
+  local path=`echo "$1" | tr '[:upper:]' '[:lower:]'`
+  local ext=${path##*.}
+  [ $ext = 'rar' ] && return 0 || return 1
 }
 
 set -eu
@@ -10,13 +17,11 @@ set -eu
 IFS="
 "
 
-lowpath=`echo $1 | tr '[:upper:]' '[:lower:]'`
-if [ ${lowpath##*.} != "rar" ]; then
-  help
-  exit 1
-fi
+is_rar "$1"
+[ $? -ne 0 ] && usage
 
-zip_name=`basename $lowpath '.rar'`.zip
+zip_name=`basename "$1"`
+zip_name=${zip_name%.*}.zip
 if [ -e $zip_name ]; then
   echo "Already exists $zip_name"
   exit 1
@@ -34,3 +39,4 @@ fi
 cd $tmp_dir
 zip -rq ../$zip_name *
 cd ..
+rm "$1"
