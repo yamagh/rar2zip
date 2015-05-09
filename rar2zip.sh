@@ -7,6 +7,9 @@ help(){
 set -eu
 : $1
 
+IFS="
+"
+
 lowpath=`echo $1 | tr '[:upper:]' '[:lower:]'`
 if [ ${lowpath##*.} != "rar" ]; then
   help
