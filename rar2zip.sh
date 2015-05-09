@@ -1,19 +1,32 @@
 #!/bin/sh
 
+help(){
+  echo Usage: foo.rar
+}
+
 set -eu
 : $1
 
-ext=${1##*.}
-[ $ext != "rar" -a $ext != "RAR" ] && exit 1
+lowpath=`echo $1 | tr '[:upper:]' '[:lower:]'`
+if [ ${lowpath##*.} != "rar" ]; then
+  help
+  exit 1
+fi
 
-zip_name=`basename $1 '.rar'`.zip
-[ -e $zip_name ] && exit 1
+zip_name=`basename $lowpath '.rar'`.zip
+if [ -e $zip_name ]; then
+  echo "Already exists $zip_name"
+  exit 1
+fi
 
-tmp_dir=$(mktemp -d XXXXXX)
+tmp_dir=$(mktemp -d rar2zip.XXXXXX)
+trap "rm -rf $tmp_dir" 0
 unrar x -inul $1 $tmp_dir
-[ $? -eq 1 ] && exit 1
+if [ $? -ne 0 ]; then
+  echo Invalied rar file
+  exit 1
+fi
 
 cd $tmp_dir
-zip -r ../$zip_name *
+zip -rq ../$zip_name *
 cd ..
-trap "rm -rf $tmp_dir" 0
